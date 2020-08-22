@@ -15,7 +15,7 @@ const useBudget = (): BudgetState => {
     const response = await fetch("/api/budget");
 
     if (response.status === 401) {
-      window.location.replace("/api/auth/signin");
+      return window.location.replace("/api/auth/signin");
     }
 
     if (response.status !== 200) {
@@ -58,7 +58,12 @@ export default function IndexPage() {
   if (loading) {
     content = <p>Loading...</p>;
   } else if (error) {
-    content = <p>{error.message}</p>;
+    content = (
+      <>
+        <p>{error.message}</p>
+        <a href="/api/auth/signin">Sign in again</a>
+      </>
+    );
   } else {
     content = (
       <>

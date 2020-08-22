@@ -7,7 +7,7 @@ export default function ConfirmPage() {
     <Container>
       <p>Check the Monzo app to approve access</p>
       <Link href="/">
-        <a style={{ textDecoration: "underline" }}>Done</a>
+        <a>Done</a>
       </Link>
     </Container>
   );

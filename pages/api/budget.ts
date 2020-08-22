@@ -21,13 +21,13 @@ export default async function budgetApi(
   try {
     auth = await getAuth(req);
   } catch (error) {
-    console.error("budgetApi: getAuth error", error);
     if (error instanceof TokenError) {
-      return res
-        .status(error.response.status)
-        .json(await error.response.json());
+      const response = await error.response.json();
+      console.error("budgetApi: getAuth error", response);
+      return res.status(500).json(response);
     }
 
+    console.error("budgetApi: getAuth error", error);
     throw error;
   }
 
