@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "prettier": "prettier --write '{lib,pages}/*.ts(x)?'"
   },
   "dependencies": {
     "cookie": "^0.4.1",
@@ -25,6 +26,7 @@
     "@types/react": "^16.9.46",
     "babel-jest": "^26.3.0",
     "jest": "^26.4.1",
+    "prettier": "^2.0.5",
     "typescript": "^4.0.2"
   }
 }

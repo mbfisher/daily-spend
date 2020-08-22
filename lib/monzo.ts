@@ -1,3 +1,3 @@
 export interface Account {
-    balance: number;
+  balance: number;
 }
