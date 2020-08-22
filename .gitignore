@@ -32,3 +32,9 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# intellij
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/tasks.xml
+.idea/shelf
