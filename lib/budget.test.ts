@@ -1,48 +1,65 @@
 import { DateTime } from "luxon";
-import { daysRemaining, getDailyBudget, resetDate } from "./budget";
+import { Ledger } from "./budget";
+import { Transaction } from "./monzo";
 
-test("resetDate()", () => {
-  // Friday 21st August
-  expect(resetDate(DateTime.local(2020, 8, 21)).toSeconds()).toEqual(
-    DateTime.local(2020, 8, 28).toSeconds()
-  );
-  expect(resetDate(DateTime.local(2020, 8, 22)).toSeconds()).toEqual(
-    DateTime.local(2020, 8, 28).toSeconds()
-  );
-  expect(resetDate(DateTime.local(2020, 8, 23)).toSeconds()).toEqual(
-    DateTime.local(2020, 8, 28).toSeconds()
-  );
-  expect(resetDate(DateTime.local(2020, 8, 24)).toSeconds()).toEqual(
-    DateTime.local(2020, 8, 28).toSeconds()
-  );
-  expect(resetDate(DateTime.local(2020, 8, 25)).toSeconds()).toEqual(
-    DateTime.local(2020, 8, 28).toSeconds()
-  );
-  expect(resetDate(DateTime.local(2020, 8, 26)).toSeconds()).toEqual(
-    DateTime.local(2020, 8, 28).toSeconds()
-  );
-  expect(resetDate(DateTime.local(2020, 8, 27)).toSeconds()).toEqual(
-    DateTime.local(2020, 8, 28).toSeconds()
-  );
-  expect(resetDate(DateTime.local(2020, 8, 28)).toSeconds()).toEqual(
-    DateTime.local(2020, 9, 4).toSeconds()
-  );
-});
+describe("Ledger", () => {
+  const transactions: Transaction[] = [
+    {
+      created: "2020-08-21T12:16:44.675Z",
+      amount: 33382,
+      include_in_spending: false,
+    },
+    {
+      created: "2020-08-21T19:42:44.933Z",
+      amount: -3920,
+      include_in_spending: true,
+    },
+    {
+      created: "2020-08-21T20:15:35.476Z",
+      amount: -1140,
+      decline_reason: "STRONG_CUSTOMER_AUTHENTICATION_REQUIRED",
+      include_in_spending: false,
+    },
+    {
+      created: "2020-08-21T20:17:26.318Z",
+      amount: -1140,
+      decline_reason: "STRONG_CUSTOMER_AUTHENTICATION_REQUIRED",
+      include_in_spending: false,
+    },
+    {
+      created: "2020-08-22T12:18:48.761Z",
+      amount: -500,
+      include_in_spending: true,
+    },
+    {
+      created: "2020-08-22T12:52:52.847Z",
+      amount: 300,
+      include_in_spending: true,
+    },
+    {
+      created: "2020-08-22T14:31:58.245Z",
+      amount: -2800,
+      include_in_spending: true,
+    },
+    {
+      created: "2020-08-22T14:42:31.973Z",
+      amount: -1663,
+      include_in_spending: true,
+    },
+    {
+      created: "2020-08-22T14:53:06.072Z",
+      amount: -3000,
+      include_in_spending: true,
+    },
+  ];
 
-test("daysRemaining()", () => {
-  // Friday 21st August
-  expect(daysRemaining(DateTime.local(2020, 8, 21))).toBe(7);
-  expect(daysRemaining(DateTime.local(2020, 8, 22))).toBe(6);
-  expect(daysRemaining(DateTime.local(2020, 8, 23))).toBe(5);
-  expect(daysRemaining(DateTime.local(2020, 8, 24))).toBe(4);
-  expect(daysRemaining(DateTime.local(2020, 8, 25))).toBe(3);
-  expect(daysRemaining(DateTime.local(2020, 8, 26))).toBe(2);
-  expect(daysRemaining(DateTime.local(2020, 8, 27))).toBe(1);
-});
+  const currentBalance = 25748;
 
-test("getDailyBudget", () => {
-  expect(getDailyBudget(70, DateTime.local(2020, 8, 21))).toEqual({
-    daysRemaining: 7,
-    budget: 10,
+  const ledger = new Ledger(transactions, currentBalance);
+  test("balanceAtStartOfDay", () => {
+    expect(ledger.balanceAtStartOfDay(DateTime.utc(2020, 8, 22))).toBe(33411);
+    expect(ledger.balanceAtStartOfDay(DateTime.utc(2020, 8, 23))).toBe(
+      currentBalance
+    );
   });
 });

@@ -7,6 +7,7 @@ import {
   tokenRequest,
 } from "../../../lib/auth";
 import { AuthData } from "../../../lib/monzo";
+import { DateTime } from "luxon";
 
 export default async function callbackApi(
   req: NextApiRequest,
@@ -32,6 +33,8 @@ export default async function callbackApi(
     console.error("callbackApi:", error);
     return res.status(500).json({ message: error.message });
   }
+
+  auth.expires_at = DateTime.utc().toSeconds() + auth.expires_in;
 
   console.log(`callbackApi: Setting ${config.auth.cookieName} cookie`);
   setAuthCookie(auth, res);

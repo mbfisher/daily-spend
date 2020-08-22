@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-const RFC3339_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+const RFC3339_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 export const fromRFC3339 = (dt: string) =>
   DateTime.fromFormat(dt, RFC3339_FORMAT);

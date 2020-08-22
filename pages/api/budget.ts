@@ -8,9 +8,15 @@ import {
   todaysBudget,
   startDate,
   spentToday,
+  Ledger,
 } from "../../lib/budget";
 import { toRFC3339 } from "../../lib/datetime";
-import { AuthData, TransactionReponse } from "../../lib/monzo";
+import {
+  AccountBalance,
+  apiRequest,
+  AuthData,
+  TransactionReponse,
+} from "../../lib/monzo";
 
 export default async function budgetApi(
   req: NextApiRequest,
@@ -45,24 +51,36 @@ export default async function budgetApi(
     },
   };
 
-  const [balance, transactions] = await Promise.all([
-    fetch(
-      `${apiUrl}/balance?account_id=${config.accountId}`,
-      apiInit
-    ).then((r) => r.json()),
-    fetch(
-      `${apiUrl}/transactions?account_id=${config.accountId}&since=${toRFC3339(
-        startDate()
-      )}`,
-      apiInit
-    ).then((r) => r.json() as Promise<TransactionReponse>),
-  ]);
+  let balance: AccountBalance;
+  let transactions: TransactionReponse;
 
+  try {
+    const results = await Promise.all([
+      apiRequest<AccountBalance>(
+        `/balance?account_id=${config.accountId}`,
+        auth
+      ),
+      apiRequest<TransactionReponse>(
+        `/transactions?account_id=${config.accountId}&since=${toRFC3339(
+          startDate()
+        )}`,
+        auth
+      ),
+    ]);
+    [balance, transactions] = results;
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  const ledger = new Ledger(transactions.transactions, balance.total_balance);
+
+  const dr = daysRemaining();
   const budget: Budget = {
     balance: balance.total_balance,
-    daysRemaining: daysRemaining(),
-    todaysBudget: todaysBudget(balance.total_balance),
-    spentToday: spentToday(transactions.transactions),
+    daysRemaining: dr,
+    todaysBudget: ledger.balanceAtStartOfDay() / dr,
+    spentToday: ledger.spentToday(),
+    tomorrowsBudget: balance.total_balance / dr,
   };
 
   res.status(200).json(budget);

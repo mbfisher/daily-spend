@@ -3,6 +3,7 @@ import cookie from "cookie";
 import config from "./config";
 import fetch, { Response } from "node-fetch";
 import { AuthData } from "./monzo";
+import { DateTime } from "luxon";
 
 export async function getAuth(req: NextApiRequest): Promise<AuthData | null> {
   const cookies = cookie.parse(req.headers.cookie ?? "");
@@ -13,7 +14,12 @@ export async function getAuth(req: NextApiRequest): Promise<AuthData | null> {
   }
 
   const auth: AuthData = JSON.parse(data);
-  return refreshToken(auth);
+
+  if (auth.expires_at < DateTime.utc().toSeconds()) {
+    return refreshToken(auth);
+  }
+
+  return auth;
 }
 
 export class TokenError extends Error {

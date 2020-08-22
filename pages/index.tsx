@@ -28,6 +28,7 @@ const useBudget = (): BudgetState => {
     }
 
     const budget: Budget = await response.json();
+    console.log({ budget });
     setBudget(budget);
   };
 
@@ -65,15 +66,29 @@ export default function IndexPage() {
       </>
     );
   } else {
+    const todaysBalance = budget.todaysBudget - budget.spentToday;
     content = (
       <>
         <div style={{ paddingBottom: "2em", textAlign: "center" }}>
-          <h1>{format.currency(budget.todaysBudget - budget.spentToday)}</h1>
+          <h1 style={{ color: todaysBalance >= 0 ? "darkgreen" : "darkred" }}>
+            {format.currency(todaysBalance)}
+          </h1>
           <span>left for today</span>
           <h3>{format.currency(budget.spentToday)}</h3>
           <span>of {format.currency(budget.todaysBudget)} spent</span>
         </div>
-        <span>Balance {format.currency(budget.balance)}</span>
+        <div
+          style={{
+            width: "100%",
+            padding: "0 3rem",
+            display: "flex",
+            justifyContent: "space-between",
+            color: "gray",
+          }}
+        >
+          <span>💰 {format.currency(budget.balance)}</span>
+          <span>➡️ {format.currency(budget.tomorrowsBudget)}</span>
+        </div>
       </>
     );
   }
