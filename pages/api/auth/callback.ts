@@ -18,6 +18,6 @@ export default async function callbackApi(
   console.log(`callbackApi: Setting ${config.auth.cookieName} cookie`);
   setAuthCookie(auth, res);
   res.redirect(
-    `${config.auth.useHttps ? "https" : "http"}://${req.headers.host}`
+    `${config.auth.useHttps ? "https" : "http"}://${req.headers.host}/confirm`
   );
 }

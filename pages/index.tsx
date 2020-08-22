@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Budget } from "../lib/budget";
+import Container from "../components/Container";
 
 interface BudgetState {
   loading: boolean;
@@ -17,8 +18,16 @@ const useBudget = (): BudgetState => {
       window.location.replace("/api/auth/signin");
     }
 
+    if (response.status !== 200) {
+      setBudget(
+        new Error(
+          `/api/budget returned ${response.status}: ${await response.text()}`
+        )
+      );
+      return;
+    }
+
     const budget: Budget = await response.json();
-    console.log({ budget });
     setBudget(budget);
   };
 
@@ -29,7 +38,7 @@ const useBudget = (): BudgetState => {
   return {
     loading: budget === undefined,
     error: budget instanceof Error ? budget : undefined,
-    budget: budget ?? undefined as any,
+    budget: budget ?? (undefined as any),
   };
 };
 
@@ -44,28 +53,25 @@ const format = {
 
 export default function IndexPage() {
   const { loading, error, budget } = useBudget();
+  let content: React.ReactNode;
 
   if (loading) {
-    return <p>Loading...</p>;
+    content = <p>Loading...</p>;
+  } else if (error) {
+    content = <p>{error.message}</p>;
+  } else {
+    content = (
+      <>
+        <div style={{ paddingBottom: "2em", textAlign: "center" }}>
+          <h1>{format.currency(budget.todaysBudget - budget.spentToday)}</h1>
+          <span>left for today</span>
+          <h3>{format.currency(budget.spentToday)}</h3>
+          <span>of {format.currency(budget.todaysBudget)} spent</span>
+        </div>
+        <span>Balance {format.currency(budget.balance)}</span>
+      </>
+    );
   }
 
-  if (error) {
-    throw error;
-  }
-
-  return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-      }}
-    >
-      <h1>{format.currency(budget.todaysBudget)}</h1>
-      <p>{budget.daysRemaining} days left</p>
-      <p>{format.currency(budget.balance)} remaining</p>
-    </div>
-  );
+  return <Container>{content}</Container>;
 }

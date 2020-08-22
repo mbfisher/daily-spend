@@ -1,25 +1,43 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import config from "../../lib/config";
 import fetch from "node-fetch";
-import { getAuth, setAuthCookie } from "../../lib/auth";
+import { getAuth, setAuthCookie, TokenError } from "../../lib/auth";
 import {
   Budget,
   daysRemaining,
   todaysBudget,
   startDate,
+  spentToday,
 } from "../../lib/budget";
+import { toRFC3339 } from "../../lib/datetime";
+import { AuthData, TransactionReponse } from "../../lib/monzo";
 
 export default async function budgetApi(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const auth = await getAuth(req);
+  let auth: AuthData | null = null;
+
+  try {
+    auth = await getAuth(req);
+  } catch (error) {
+    console.error("budgetApi: getAuth error", error);
+    if (error instanceof TokenError) {
+      return res
+        .status(error.response.status)
+        .json(await error.response.json());
+    }
+
+    throw error;
+  }
 
   if (auth === null) {
+    console.log("budgetApi: no auth found, sending 401");
     return res.status(401).end();
   }
 
   setAuthCookie(auth, res);
+
   const apiUrl = "https://api.monzo.com";
   const apiInit = {
     headers: {
@@ -33,17 +51,18 @@ export default async function budgetApi(
       apiInit
     ).then((r) => r.json()),
     fetch(
-      `${apiUrl}/transactions?account_id=${
-        config.accountId
-      }&since=${startDate().toFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")}`,
+      `${apiUrl}/transactions?account_id=${config.accountId}&since=${toRFC3339(
+        startDate()
+      )}`,
       apiInit
-    ).then((r) => r.json()),
+    ).then((r) => r.json() as Promise<TransactionReponse>),
   ]);
 
   const budget: Budget = {
     balance: balance.total_balance,
     daysRemaining: daysRemaining(),
     todaysBudget: todaysBudget(balance.total_balance),
+    spentToday: spentToday(transactions.transactions),
   };
 
   res.status(200).json(budget);

@@ -1,11 +1,12 @@
-export default {
+const config = {
   auth: {
-    clientId: "oauth2client_00009yLxf4lLljrNCztml7",
-    clientSecret:
-      "mnzconf.K1v6U8kLoTuPtyeQ+o/mtnOAbdSyl+u2gaGbuXr2JH4Rw/uIHmOx6+zTCSmXw2brawZUbMuN7DV3ZTZMhM0n",
+    clientId: process.env.MONZO_CLIENT_ID,
+    clientSecret: process.env.MONZO_CLIENT_SECRET,
+    useHttps: Object.keys(process.env).includes("MONZO_USE_HTTPS"),
     redirectUri: "/api/auth/callback",
     cookieName: "auth",
-    useHttps: false,
   },
-  accountId: "acc_00009fEg46UURXbydkzqIz",
+  accountId: process.env.MONZO_ACCOUNT_ID,
 };
+
+export default config;

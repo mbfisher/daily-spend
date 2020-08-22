@@ -1,4 +1,6 @@
 import { DateTime } from "luxon";
+import { Transaction } from "./monzo";
+import { fromRFC3339 } from "./datetime";
 
 const RESET_DAY = 5; // Friday
 
@@ -6,6 +8,7 @@ export interface Budget {
   balance: number;
   todaysBudget: number;
   daysRemaining: number;
+  spentToday: number;
 }
 
 const getToday = () => DateTime.utc().startOf("day");
@@ -39,7 +42,16 @@ export const daysRemaining = (today?: DateTime) => {
 };
 
 export const todaysBudget = (balance: number, today?: DateTime) => {
-  return balance / daysRemaining(today);
+  return Math.floor(balance / daysRemaining(today));
 };
 
-// export const spentToday = (transactions: )
+export const spentToday = (transactions: Transaction[]): number => {
+  const today = DateTime.utc().startOf("day");
+  return transactions
+    .filter((t) => t.include_in_spending)
+    .filter((t) => {
+      const created = fromRFC3339(t.created);
+      return created.startOf("day").equals(today);
+    })
+    .reduce((result, t) => result - t.amount, 0);
+};
