@@ -3,7 +3,7 @@ const config = {
     clientId: process.env.MONZO_CLIENT_ID,
     clientSecret: process.env.MONZO_CLIENT_SECRET,
     useHttps: Object.keys(process.env).includes("MONZO_USE_HTTPS"),
-    redirectUri: "/api/auth/callback",
+    redirectUri: "/welcome",
     cookieName: "auth",
   },
   accountId: process.env.MONZO_ACCOUNT_ID,

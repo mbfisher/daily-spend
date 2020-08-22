@@ -9,7 +9,6 @@ export default function Container({ children }: { children: React.ReactNode }) {
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
-        padding: "10em",
       }}
     >
       {children}
